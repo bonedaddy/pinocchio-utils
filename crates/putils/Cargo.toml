@@ -1,10 +1,9 @@
 [package]
 name = "putils"
-version = "0.0.1"
+version = "0.0.2"
 description = "Utilities for writing Solana programs with the pinocchio framework"
 keywords = ["solana", "pinocchio"]
 readme = "../../README.md"
-documentation = "https://docs.rs/putils/latest/putils"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
