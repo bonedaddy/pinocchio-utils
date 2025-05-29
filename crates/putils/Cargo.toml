@@ -1,0 +1,18 @@
+[package]
+name = "putils"
+version = "0.0.1"
+description = "Utilities for writing Solana programs with the pinocchio framework"
+keywords = ["solana", "pinocchio"]
+readme = "../../README.md"
+documentation = "https://docs.rs/putils/latest/putils"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies.pinocchio]
+version = "0.8.4"
+[dev-dependencies.pinocchio-pubkey]
+version = "0.2.4"
+[dev-dependencies.bs58]
+version = "0.5.1"
