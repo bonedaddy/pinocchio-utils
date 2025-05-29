@@ -66,6 +66,13 @@ pub trait AccountWrite: AccountSerialize {
     }
 }
 
+/// The AccountRead trait is used to handle deserializing an account from [`AccountInfo`]
+pub trait AccountRead: AccountDeserialize + Sized {
+    fn account_read(account_info: &AccountInfo) -> Result<Self, ProgramError> {
+        Self::try_from_bytes(&account_info.try_borrow_data()?)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use {
