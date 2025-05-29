@@ -3,4 +3,5 @@
 pub mod account;
 pub mod discriminator;
 pub mod instruction_packer;
+pub mod processor;
 pub mod uint;
