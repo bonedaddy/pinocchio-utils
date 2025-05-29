@@ -1,3 +1,5 @@
+//! Anchor-esque account and instruction discriminator
+
 /// The AccountDiscriminator trait is used to uniquely identify accounts
 pub trait AccountDiscriminator {
     const DISCRIMINATOR: u8;

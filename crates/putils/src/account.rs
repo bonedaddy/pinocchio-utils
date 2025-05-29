@@ -1,3 +1,5 @@
+//! Traits for serialization/deserialization of accounts, and writing serialized account data to [`AccountInfo`]
+
 use {
     crate::discriminator::AccountDiscriminator,
     pinocchio::{account_info::AccountInfo, program_error::ProgramError, ProgramResult},

@@ -1,3 +1,5 @@
+//! Instruction packing/unpacking traits
+
 use {crate::discriminator::InstructionDiscriminator, pinocchio::program_error::ProgramError};
 
 /// The InstructionPacker trait is used to handle packing/unpacking of instruction data
