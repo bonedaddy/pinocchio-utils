@@ -107,7 +107,7 @@ pub trait AccountRead: AccountDeserialize + PdaDeriver + Sized {
 /// The PdaDeriver trait is used to define how to derive a PDA for a specific account
 pub trait PdaDeriver: ProgramId {
     /// Derives a PDA from the provided seeds
-    fn derive_pda(seeds: &[u8]) -> (Pubkey, u8) {
+    fn pda_derive(seeds: &[u8]) -> (Pubkey, u8) {
         find_program_address(&[seeds], &Self::PROGRAM_ID)
     }
     /// Creates a PDA from values in the account
