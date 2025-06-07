@@ -3,7 +3,10 @@
 use {
     crate::discriminator::AccountDiscriminator,
     pinocchio::{
-        account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey, ProgramResult,
+        account_info::AccountInfo,
+        program_error::ProgramError,
+        pubkey::{find_program_address, Pubkey},
+        ProgramResult,
     },
 };
 
@@ -70,15 +73,50 @@ pub trait AccountWrite: AccountSerialize {
 }
 
 /// The AccountRead trait is used to handle deserializing an account from [`AccountInfo`]
-pub trait AccountRead: AccountDeserialize + Sized {
-    const PROGRAM_ID: Pubkey;
-    /// Reads account data, validating the account discriminator and program owner
+pub trait AccountRead: AccountDeserialize + PdaDeriver + Sized {
+    /// Reads account data, validating the following:
+    /// * Account discriminator
+    /// * Account program owner
+    /// * Account address
+    ///
+    /// Account address validation is used to prevent exploits whereby an attacker may create an account in a different program
+    /// and store data inside this account that would pass the discriminator and deserialization checks. Then assign the owner of that account
+    /// to your program.
+    ///
+    /// For example if I create an account that stores a bump seed, and assign a value to that bump seed, this will still pass account discriminator
+    /// and deserialization checks. However when the [`PdaDeriver::create_pda`] check is performed, the validation will fail.
     fn account_read(account_info: &AccountInfo) -> Result<Self, ProgramError> {
+        // validate the account owner
         if !account_info.is_owned_by(&Self::PROGRAM_ID) {
-            return Err(ProgramError::IllegalOwner);
+            return Err(ProgramError::InvalidAccountOwner);
         }
-        Self::try_from_bytes(&account_info.try_borrow_data()?)
+
+        // deserialize the account and validate the discriminator
+        let account = Self::try_from_bytes(&account_info.try_borrow_data()?)?;
+
+        // validate the account address
+        let expected_pda = account.create_pda();
+        if !account_info.key().eq(&expected_pda) {
+            return Err(ProgramError::InvalidSeeds);
+        }
+
+        Ok(account)
     }
+}
+
+/// The PdaDeriver trait is used to define how to derive a PDA for a specific account
+pub trait PdaDeriver: ProgramId {
+    /// Derives a PDA from the provided seeds
+    fn derive_pda(seeds: &[u8]) -> (Pubkey, u8) {
+        find_program_address(&[seeds], &Self::PROGRAM_ID)
+    }
+    /// Creates a PDA from values in the account
+    fn create_pda(&self) -> Pubkey;
+}
+
+/// The ProgramId trait is used to specify the expected owner of an account
+pub trait ProgramId {
+    const PROGRAM_ID: Pubkey;
 }
 
 #[cfg(test)]
