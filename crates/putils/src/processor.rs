@@ -3,20 +3,25 @@
 use pinocchio::{account_info::AccountInfo, program_error::ProgramError, ProgramResult};
 
 /// InstructionProcessor is a trait used to define how any given instruction may be constructed, and subsequently processed
-pub trait InstructionProcessor<'a, Ix>: Sized {
+pub trait InstructionProcessor<'a, Ix, T>: Sized {
     /// Constructions the instruction process type from a slice of accounts
     fn from_accounts(accounts: &'a [AccountInfo]) -> Result<Self, ProgramError>;
 
     fn try_process(&self, instruction: Ix) -> ProgramResult {
-        self.validations(&instruction)?;
-        self.process(instruction)
+        let validations_result = self.validations(&instruction)?;
+        self.process(instruction, validations_result)
     }
 
     /// Handler function which invocations the business logic for an instruction
-    fn process(&self, instruction: Ix) -> ProgramResult;
+    fn process(&self, instruction: Ix, validations_result: Option<T>) -> ProgramResult;
 
     /// Validations which which performs validation of the instruction inputs, and acounts
-    fn validations(&self, instruction: &Ix) -> ProgramResult;
+    ///
+    /// The validations function allows returning an optional result, which can be fed into the [`InstructionProcessor::process`]
+    /// function. This can be used for things like returning the bump seed from PDA derivation, to be reused within the process function
+    /// to create an account, without having to re-derive the PDA
+    ///
+    fn validations(&self, instruction: &Ix) -> Result<Option<T>, ProgramError>;
 }
 
 #[cfg(test)]
@@ -31,6 +36,10 @@ mod test {
         payer: &'a AccountInfo,
         msg: &'a AccountInfo,
         system_program: &'a AccountInfo,
+    }
+
+    pub struct HelloAccountsValidationResult {
+        pub nocne: u8,
     }
 
     impl<'a> TryFrom<&'a [AccountInfo]> for HelloAccounts<'a> {
@@ -49,15 +58,39 @@ mod test {
         }
     }
 
-    impl<'a> InstructionProcessor<'a, TestInstruction> for HelloAccounts<'a> {
+    impl<'a> InstructionProcessor<'a, TestInstruction, ()> for HelloAccounts<'a> {
         fn from_accounts(accounts: &'a [AccountInfo]) -> Result<Self, ProgramError> {
             HelloAccounts::try_from(accounts)
         }
-        fn process(&self, instruction: TestInstruction) -> ProgramResult {
+        fn process(
+            &self,
+            instruction: TestInstruction,
+            validations_result: Option<()>,
+        ) -> ProgramResult {
             Ok(())
         }
-        fn validations(&self, instruction: &TestInstruction) -> ProgramResult {
+        fn validations(&self, instruction: &TestInstruction) -> Result<Option<()>, ProgramError> {
+            Ok(None)
+        }
+    }
+    impl<'a> InstructionProcessor<'a, TestInstruction, HelloAccountsValidationResult>
+        for HelloAccounts<'a>
+    {
+        fn from_accounts(accounts: &'a [AccountInfo]) -> Result<Self, ProgramError> {
+            HelloAccounts::try_from(accounts)
+        }
+        fn process(
+            &self,
+            instruction: TestInstruction,
+            validations_result: Option<HelloAccountsValidationResult>,
+        ) -> ProgramResult {
             Ok(())
+        }
+        fn validations(
+            &self,
+            instruction: &TestInstruction,
+        ) -> Result<Option<HelloAccountsValidationResult>, ProgramError> {
+            Ok(None)
         }
     }
 }

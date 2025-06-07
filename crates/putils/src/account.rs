@@ -2,7 +2,9 @@
 
 use {
     crate::discriminator::AccountDiscriminator,
-    pinocchio::{account_info::AccountInfo, program_error::ProgramError, ProgramResult},
+    pinocchio::{
+        account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey, ProgramResult,
+    },
 };
 
 /// The AccountSerialize trait is used to handle serialization of accounts
@@ -61,6 +63,7 @@ pub trait AccountWrite: AccountSerialize {
         self.account_write_into(&mut data[..Self::SERIALIZED_SIZE])
     }
 
+    /// Writes the serialized account (with discriminator) into an arbitrary buffer
     fn account_write_into(&self, buffer: &mut [u8]) -> Result<(), ProgramError> {
         self.into_bytes(buffer)
     }
@@ -68,7 +71,14 @@ pub trait AccountWrite: AccountSerialize {
 
 /// The AccountRead trait is used to handle deserializing an account from [`AccountInfo`]
 pub trait AccountRead: AccountDeserialize + Sized {
+    const PROGRAM_ID: Pubkey;
+    /// Reads account data, validating the account discriminator and program owner
     fn account_read(account_info: &AccountInfo) -> Result<Self, ProgramError> {
+        unsafe {
+            if account_info.owner().ne(&Self::PROGRAM_ID) {
+                return Err(ProgramError::IllegalOwner);
+            }
+        }
         Self::try_from_bytes(&account_info.try_borrow_data()?)
     }
 }

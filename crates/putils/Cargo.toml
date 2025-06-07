@@ -1,6 +1,6 @@
 [package]
 name = "putils"
-version = "0.0.6"
+version = "0.0.7"
 description = "Utilities for writing Solana programs with the pinocchio framework"
 keywords = ["solana", "pinocchio"]
 documentation = "https://docs.rs/putils/latest/putils/"
