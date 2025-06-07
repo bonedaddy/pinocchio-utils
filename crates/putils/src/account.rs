@@ -74,10 +74,8 @@ pub trait AccountRead: AccountDeserialize + Sized {
     const PROGRAM_ID: Pubkey;
     /// Reads account data, validating the account discriminator and program owner
     fn account_read(account_info: &AccountInfo) -> Result<Self, ProgramError> {
-        unsafe {
-            if account_info.owner().ne(&Self::PROGRAM_ID) {
-                return Err(ProgramError::IllegalOwner);
-            }
+        if !account_info.is_owned_by(&Self::PROGRAM_ID) {
+            return Err(ProgramError::IllegalOwner);
         }
         Self::try_from_bytes(&account_info.try_borrow_data()?)
     }
