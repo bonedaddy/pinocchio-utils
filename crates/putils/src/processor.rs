@@ -7,7 +7,13 @@ pub trait InstructionProcessor<'a, Ix, T>: Sized {
     /// Constructions the instruction process type from a slice of accounts
     fn from_accounts(accounts: &'a [AccountInfo]) -> Result<Self, ProgramError>;
 
+    /// The main entrypoint for processing this specific instruction, ensuring that
+    ///
+    /// * The instruction name is logged
+    /// * Validations are performed
+    /// * Business logic is invoked
     fn try_process(&self, instruction: Ix) -> ProgramResult {
+        self.log_ix();
         let validations_result = self.validations(&instruction)?;
         self.process(instruction, validations_result)
     }
@@ -22,10 +28,15 @@ pub trait InstructionProcessor<'a, Ix, T>: Sized {
     /// to create an account, without having to re-derive the PDA
     ///
     fn validations(&self, instruction: &Ix) -> Result<Option<T>, ProgramError>;
+
+    /// Logs the instruction name being invoked
+    fn log_ix(&self);
 }
 
 #[cfg(test)]
 mod test {
+    use pinocchio::msg;
+
     use super::*;
     #[derive(Clone, Debug, PartialEq, Eq)]
     pub enum TestInstruction {
@@ -72,6 +83,9 @@ mod test {
         fn validations(&self, instruction: &TestInstruction) -> Result<Option<()>, ProgramError> {
             Ok(None)
         }
+        fn log_ix(&self) {
+            msg!("Instruction: HelloAccounts")
+        }
     }
     impl<'a> InstructionProcessor<'a, TestInstruction, HelloAccountsValidationResult>
         for HelloAccounts<'a>
@@ -91,6 +105,9 @@ mod test {
             instruction: &TestInstruction,
         ) -> Result<Option<HelloAccountsValidationResult>, ProgramError> {
             Ok(None)
+        }
+        fn log_ix(&self) {
+            msg!("Instruction: HelloAccounts")
         }
     }
 }
