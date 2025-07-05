@@ -58,16 +58,23 @@ pub trait AccountDeserialize: AccountDiscriminator + Sized {
 }
 
 /// The AccountWrite trait is used to handle persisting accounts into [`AccountInfo`]
-pub trait AccountWrite: AccountSerialize {
+///
+/// [`AccountWrite`] is consumes the implementing object, which is designed as a safety
+/// measure designed to prevent partial state change persistence.
+///
+/// For example if you have a lending pool, we dont want to write lending reserve state changes
+/// such as interest rate adjustments, accept deposits, make changes to the tracked deposited amounts
+/// but forget to persist those state changes.
+pub trait AccountWrite: AccountSerialize + Sized {
     /// Writes the serialized account (with discriminator)
-    fn account_write(&self, account_info: &AccountInfo) -> ProgramResult {
+    fn account_write(self, account_info: &AccountInfo) -> ProgramResult {
         let mut data = account_info.try_borrow_mut_data()?;
 
         self.account_write_into(&mut data[..Self::SERIALIZED_SIZE])
     }
 
     /// Writes the serialized account (with discriminator) into an arbitrary buffer
-    fn account_write_into(&self, buffer: &mut [u8]) -> Result<(), ProgramError> {
+    fn account_write_into(self, buffer: &mut [u8]) -> Result<(), ProgramError> {
         self.into_bytes(buffer)
     }
 }
@@ -127,7 +134,7 @@ mod test {
         pinocchio::pubkey::Pubkey,
     };
 
-    #[derive(Debug, PartialEq, Eq)]
+    #[derive(Debug, PartialEq, Eq, Clone)]
     pub struct FooBar {
         pub key: Pubkey,
         pub amount: u64,
@@ -192,7 +199,7 @@ mod test {
         };
         let mut buffer = [0u8; FooBar::SERIALIZED_SIZE];
 
-        foo_bar.account_write_into(&mut buffer).unwrap();
+        foo_bar.clone().account_write_into(&mut buffer).unwrap();
 
         let decoded_foobar = FooBar::try_from_bytes(&buffer).unwrap();
 
