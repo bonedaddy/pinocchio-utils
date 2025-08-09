@@ -37,7 +37,7 @@ pub trait AccountSerialize: AccountDiscriminator {
         buffer[0] = Self::DISCRIMINATOR;
         // determine how far into the account buffer to write into
         let inner_bytes = self.to_bytes_inner();
-        let len = inner_bytes.len();
+        let len = inner_bytes.len()-1;
         buffer[1..len].copy_from_slice(&inner_bytes);
 
         Ok(())
