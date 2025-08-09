@@ -35,7 +35,11 @@ pub trait AccountSerialize: AccountDiscriminator {
         }
 
         buffer[0] = Self::DISCRIMINATOR;
-        buffer[1..].copy_from_slice(&self.to_bytes_inner());
+        // read the size of the account buffer to determine the offset in the buffer to write into
+        // note: if the serialized account data is larger than the buffer space
+        //       we don't need to worry about partially written data as this function will panic
+        let len = buffer.len()-1;
+        buffer[1..len].copy_from_slice(&self.to_bytes_inner());
 
         Ok(())
     }
