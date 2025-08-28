@@ -1,6 +1,6 @@
 [package]
 name = "putils"
-version = "0.1.0"
+version = "0.1.1"
 description = "Utilities for writing Solana programs with the pinocchio framework"
 keywords = ["solana", "pinocchio"]
 documentation = "https://docs.rs/putils/latest/putils/"
@@ -11,8 +11,8 @@ repository.workspace = true
 rust-version.workspace = true
 
 [dependencies.pinocchio]
-version = "0.8.4"
+version = "0.9.1"
 [dev-dependencies.pinocchio-pubkey]
-version = "0.2.4"
+version = "0.3.0"
 [dev-dependencies.bs58]
 version = "0.5.1"

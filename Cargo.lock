@@ -28,28 +28,35 @@ checksum = "2551bf44bc5f776c15044b9b94153a00198be06743e262afaaa61f11ac7523a5"
 
 [[package]]
 name = "pinocchio"
-version = "0.8.4"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c33b58567c11b07749cefbb8320ac023f3387c57807aeb8e3b1262501b6e9f0"
+checksum = "0c3410a5d525f024b0aed7f8747e94e918c91ba64274a190e2365903e2c0b2e9"
 
 [[package]]
 name = "pinocchio-pubkey"
-version = "0.2.4"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c6b20fcebc172c3cd3f54114b0241b48fa8e30893ced2eb4927aaba5e3a0ba5"
+checksum = "cb0225638cadcbebae8932cb7f49cb5da7c15c21beb19f048f05a5ca7d93f065"
 dependencies = [
  "five8_const",
  "pinocchio",
+ "sha2-const-stable",
 ]
 
 [[package]]
 name = "putils"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bs58",
  "pinocchio",
  "pinocchio-pubkey",
 ]
+
+[[package]]
+name = "sha2-const-stable"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f179d4e11094a893b82fff208f74d448a7512f99f5a0acbd5c679b705f83ed9"
 
 [[package]]
 name = "tinyvec"
